@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --light-100: hsl(0, 0%, 100%);
+  --light-200: hsl(60, 7%, 97%);
+  --light-300: hsl(60, 3%, 94%);
+  --dark-100: hsl(45, 8%, 20%);
+  --dark-200: hsl(45, 2%, 36%);
+  --primary-100: hsl(212, 32%, 48%);
+}
+
+body {
+  color: var(--dark-100);
+  font-family: Arial, Helvetica, sans-serif;
+}
