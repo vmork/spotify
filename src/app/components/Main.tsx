@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPlaylists, getAllUserTracks, getUser, Playlist, Track } from "../lib/spotify-api";
+import { release } from "os";
 
 export default function Main() {
   const queryClient = useQueryClient();
@@ -32,9 +33,6 @@ export default function Main() {
     queryFn: () => getPlaylists(accessToken!, user!.id),
     enabled: isAuthenticated && !!user,
     retry: false,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
   });
   const playlists = playlistsQuery.data as Playlist[];
   playlists?.sort((a, b) => b.numTracks - a.numTracks);
@@ -45,6 +43,9 @@ export default function Main() {
     queryFn: () => getAllUserTracks(accessToken!, playlists),
     enabled: isAuthenticated && !!playlists,
     retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
   const allTracks = allTracksQuery.data;
   allTracks?.sort((a, b) => a.name.localeCompare(b.name));
@@ -60,6 +61,8 @@ export default function Main() {
   }
 
   const filteredTracks = filterBySearch(allTracks ?? [], searchText);
+
+  console.log(filteredTracks.slice(0, 50));
 
   return (
     <div>
@@ -110,18 +113,32 @@ export default function Main() {
           {allTracks && (
             <div className="mt-2 p-2">
               <p className="text-center">{allTracks.length} unique tracks</p>
-              <input type="text" 
-                placeholder="Search tracks" 
-                className="p-1 m-1 border border-dark-100 rounded" 
-                value={searchText} 
+              <input
+                type="text"
+                placeholder="Search tracks"
+                className="p-1 mb-2 w-[300px] border border-dark-100 rounded"
+                value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
               />
               <div className="">
-                {filteredTracks.map(({ id, name, artists, album }) => (
-                  <div className="grid grid-cols-[1fr,1fr] border-y" key={id}>
-                    <div className="truncate">{name}</div>
-                    <div className="text-dark-200 text-sm truncate">{album}</div>
-                    <div className="text-dark-200 text-sm truncate">{artists.join(", ")}</div>
+                {filteredTracks.map(({ id, name, artists, album, inPlaylists, durationMs, popularity, releaseYear }) => (
+                  <div className="grid grid-cols-[2fr,1fr,1fr,50px] border-y gap-x-1" key={id}>
+                    {/* name, artist */}
+                    <div className="truncate">
+                      <div className="truncate">{name}</div>
+                      <div className="text-dark-200 text-sm truncate">{artists.join(", ")}</div>
+                    </div>
+
+                    {/* playlists */}
+                    <div className="text-dark-200 text-sm truncate">
+                      {inPlaylists.map((p) => p.name).join(", ")}
+                    </div>
+                    
+                    {/* year */}
+                    <div className="text-sm">{releaseYear}</div>
+
+                    {/* popularity */}
+                    <div className="text-sm">{popularity}/100</div>
                   </div>
                 ))}
               </div>
