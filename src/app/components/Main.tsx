@@ -48,7 +48,7 @@ export default function Main() {
 
   const [searchText, setSearchText] = useState("");
 
-  function filterBySearch(tracks: Track[]) {
+  function filterBySearch(tracks: Track[], searchText: string) {
     if (!searchText.trim()) return tracks;
     return tracks.filter((track) => {
       const text = `${track.name} ${track.artists.join(" ")} ${track.album}`;
@@ -56,7 +56,7 @@ export default function Main() {
     });
   }
 
-  const filteredTracks = filterBySearch(allTracks ?? []);
+  const filteredTracks = filterBySearch(allTracks ?? [], searchText);
 
   return (
     <div>
@@ -109,12 +109,12 @@ export default function Main() {
               <p className="text-center">{allTracks.length} unique tracks</p>
               <input type="text" 
                 placeholder="Search tracks" 
-                className="w-full p-2 border border-dark-100 rounded" 
+                className="p-1 m-1 border border-dark-100 rounded" 
                 value={searchText} 
                 onChange={(e) => setSearchText(e.target.value)}
               />
               <div className="">
-                {allTracks.map(({ id, name, artists, album }) => (
+                {filteredTracks.map(({ id, name, artists, album }) => (
                   <div className="grid grid-cols-[1fr,1fr] border-y" key={id}>
                     <div className="truncate">{name}</div>
                     <div className="text-dark-200 text-sm truncate">{album}</div>
