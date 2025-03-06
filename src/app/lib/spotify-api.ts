@@ -29,6 +29,15 @@ async function getAllPaginated<T>(
     const response = await fetch(nextUrl, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    if (response.status === 429) {
+      const retryAfter = response.headers.get("Retry-After"); // cant read on client side (cors)
+      const waitTime = retryAfter ? parseInt(retryAfter, 10) * 1000 : 1020;
+      console.log(`Rate limited, waiting ${waitTime}ms`);
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
+      continue;
+    }
+
     if (!response.ok) throw new Error(`${errorMsg}: ${response.status} ${await response.text()}`);
     const json = await response.json();
     data = data.concat(json.items);

@@ -32,6 +32,9 @@ export default function Main() {
     queryFn: () => getPlaylists(accessToken!, user!.id),
     enabled: isAuthenticated && !!user,
     retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
   const playlists = playlistsQuery.data as Playlist[];
   playlists?.sort((a, b) => b.numTracks - a.numTracks);
