@@ -55,7 +55,7 @@ export default function Main() {
     if (!searchText.trim()) return tracks;
     return tracks.filter((track) => {
       const text = `${track.name} ${track.artists.join(" ")} ${track.album}`;
-      text.toLowerCase().includes(searchText.toLowerCase());
+      return text.toLowerCase().includes(searchText.toLowerCase());
     });
   }
 
