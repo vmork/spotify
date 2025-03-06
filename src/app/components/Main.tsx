@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPlaylists, getAllUserTracks, getUser, Playlist, Track } from "../lib/spotify-api";
 import { release } from "os";
+import { ListHeader } from "./ListHeader";
+import { cn } from "../lib/utils";
 
 export default function Main() {
   const queryClient = useQueryClient();
@@ -48,21 +50,42 @@ export default function Main() {
     refetchOnReconnect: false,
   });
   const allTracks = allTracksQuery.data;
-  allTracks?.sort((a, b) => a.name.localeCompare(b.name));
 
   const [searchText, setSearchText] = useState("");
+  
+  const [selectedPlaylists, setSelectedPlaylists] = useState<Playlist[]>([]);
 
-  function filterBySearch(tracks: Track[], searchText: string) {
+  function togglePlaylistSelected(playlist: Playlist) {
+    setSelectedPlaylists((playlists) =>
+      playlists.includes(playlist)
+        ? playlists.filter((p) => p.id !== playlist.id)
+        : [...playlists, playlist]
+    );
+  }
+  
+  const [selectedTracks, setSelectedTracks] = useState<Track[]|undefined>(allTracks);
+
+  function filterBySearch(tracks: Track[]) {
     if (!searchText.trim()) return tracks;
     return tracks.filter((track) => {
-      const text = `${track.name} ${track.artists.join(" ")} ${track.album}`;
+      const text = `${track.name} ${track.artists.join(" ")} ${track.releaseYear.toString()}`;
       return text.toLowerCase().includes(searchText.toLowerCase());
     });
   }
+  
+  function filterTracks(tracks: Track[]) {
+    if (selectedPlaylists.length) {
+      let ts = tracks.filter(track => selectedPlaylists.some(p => track.inPlaylists.includes(p)));
+      return filterBySearch(ts);
+    }
+    return tracks;
+  }
 
-  const filteredTracks = filterBySearch(allTracks ?? [], searchText);
-
-  console.log(filteredTracks.slice(0, 50));
+  useEffect(() => {
+    let tracks = filterTracks(allTracks ?? []);
+    tracks.sort((a, b) => a.name.localeCompare(b.name));
+    setSelectedTracks(tracks);
+  }, [allTracks, searchText]);
 
   return (
     <div>
@@ -95,12 +118,15 @@ export default function Main() {
                 {allTracks ? ` (${allTracks.length} unique)` : ""}
               </p>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-1 gap-y-1">
-                {playlistsQuery.data.map(({ id, name, numTracks }) => (
+                {playlistsQuery.data.map((playlist) => (
                   <div
-                    className="bg-light-100 text-sm border border-dark-100 rounded p-0.5"
-                    key={id}
+                    onClick={() => togglePlaylistSelected(playlist)}
+                    className={cn("cursor-pointer bg-light-100 text-sm border border-dark-100 rounded p-0.5", 
+                      selectedPlaylists.includes(playlist) && "bg-primary-100 text-light-100"
+                    )}
+                    key={playlist.id}
                   >
-                    {name} <span className="text-dark-200">({numTracks} tracks)</span>
+                    {playlist.name} <span className="ml-auto">({playlist.numTracks} tracks)</span>
                   </div>
                 ))}
               </div>
@@ -111,9 +137,9 @@ export default function Main() {
           {allTracksQuery.isError && (
             <div className="text-red-400">Error: {allTracksQuery.error.message}</div>
           )}
-          {allTracks && (
+          {selectedTracks && (
             <div className="mt-2 p-2">
-              <p className="text-center">{filteredTracks.length} selected tracks</p>
+              <p className="text-center">{selectedTracks.length} selected tracks</p>
               <input
                 type="text"
                 placeholder="Search tracks"
@@ -122,26 +148,69 @@ export default function Main() {
                 onChange={(e) => setSearchText(e.target.value)}
               />
               <div className="">
-                {filteredTracks.map(({ id, name, artists, album, inPlaylists, durationMs, popularity, releaseYear }) => (
-                  <div className="grid grid-cols-[2fr,1fr,1fr,50px] border-y gap-x-1" key={id}>
-                    {/* name, artist */}
-                    <div className="truncate">
-                      <div className="truncate">{name}</div>
-                      <div className="text-dark-200 text-sm truncate">{artists.join(", ")}</div>
-                    </div>
+                {/* list headers */}
+                <div className="grid grid-cols-[1fr,1fr,100px,100px] border-y border-dark-100 gap-x-1 font-semibold">
+                  <ListHeader
+                    name="Name"
+                    sortKey={(a, b) => a.name.localeCompare(b.name)}
+                    tracks={selectedTracks}
+                    setTracks={setSelectedTracks}
+                  />
 
-                    {/* playlists */}
-                    <div className="text-dark-200 text-sm truncate">
-                      {inPlaylists.map((p) => p.name).join(", ")}
-                    </div>
-                    
-                    {/* year */}
-                    <div className="text-sm">{releaseYear}</div>
+                  <ListHeader
+                    name="Playlists"
+                    sortKey={(a, b) => a.inPlaylists.length - b.inPlaylists.length}
+                    tracks={selectedTracks}
+                    setTracks={setSelectedTracks}
+                  />
 
-                    {/* popularity */}
-                    <div className="text-sm">{popularity}/100</div>
-                  </div>
-                ))}
+                  <ListHeader
+                    name="Realeased"
+                    sortKey={(a, b) => a.releaseYear - b.releaseYear}
+                    tracks={selectedTracks}
+                    setTracks={setSelectedTracks}
+                  />
+
+                  <ListHeader
+                    name="Popularity"
+                    sortKey={(a, b) => a.popularity - b.popularity}
+                    tracks={selectedTracks}
+                    setTracks={setSelectedTracks}
+                  />
+                </div>
+
+                {/* list */}
+                {selectedTracks.map(
+                  ({
+                    id,
+                    name,
+                    artists,
+                    album,
+                    inPlaylists,
+                    durationMs,
+                    popularity,
+                    releaseYear,
+                  }) => (
+                    <div className="grid grid-cols-[1fr,1fr,100px,100px] border-y gap-x-1" key={id}>
+                      {/* name, artist */}
+                      <div className="truncate">
+                        <div className="truncate">{name}</div>
+                        <div className="text-dark-200 text-sm truncate">{artists.join(", ")}</div>
+                      </div>
+
+                      {/* playlists */}
+                      <div className="text-dark-200 text-sm truncate">
+                        {inPlaylists.map((p) => p.name).join(", ")}
+                      </div>
+
+                      {/* year */}
+                      <div className="text-sm text-dark-200">{releaseYear}</div>
+
+                      {/* popularity */}
+                      <div className="text-sm text-dark-200">{popularity}/100</div>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           )}
