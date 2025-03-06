@@ -30,7 +30,7 @@ async function getAllPaginated<T>(
   let data: T[] = [];
   let nextUrl = url;
   while (nextUrl) {
-    const response = await fetch(nextUrl, {
+    const response = await fetch(`${nextUrl}${nextUrl.includes('?') ? '&' : '?'}limit=50`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

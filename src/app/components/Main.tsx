@@ -92,6 +92,7 @@ export default function Main() {
             <div className="p-2 text-center">
               <p>
                 {playlists.length} playlists with {totalTrackCount} tracks
+                {allTracks ? ` (${allTracks.length} unique)` : ""}
               </p>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-1 gap-y-1">
                 {playlistsQuery.data.map(({ id, name, numTracks }) => (
@@ -112,7 +113,7 @@ export default function Main() {
           )}
           {allTracks && (
             <div className="mt-2 p-2">
-              <p className="text-center">{allTracks.length} unique tracks</p>
+              <p className="text-center">{filteredTracks.length} selected tracks</p>
               <input
                 type="text"
                 placeholder="Search tracks"
