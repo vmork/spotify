@@ -142,10 +142,13 @@ export default function Main() {
           )}
           {playlists && (
             <div className="p-2 text-center">
-              <p className="mb-2 font-semibold">
-                {playlists.length} playlists with {totalTrackCount} tracks
-                {allTracks ? ` (${allTracks.length} unique)` : ""}
-              </p>
+              <div className="flex justify-center items-center mb-2">
+                <span className="font-semibold">
+                  {playlists.length} playlists with {totalTrackCount} tracks
+                  {allTracks ? ` (${allTracks.length} unique)` : ""}
+                </span>
+                <span className="text-dark-200 ml-4 text-sm">(Click to select)</span>
+              </div>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-x-1 gap-y-1">
                 {playlists.map((playlist) => (
                   <div
@@ -172,7 +175,7 @@ export default function Main() {
           )}
 
           {/* Tracks */}
-          {allTracksQuery.isLoading && <div>Loading tracks...</div>}
+          {allTracksQuery.isLoading && <div className="text-lg ml-2 font-semibold">Loading tracks...</div>}
           {allTracksQuery.isError && (
             <div className="text-red-400">Error: {allTracksQuery.error.message}</div>
           )}
@@ -208,7 +211,7 @@ export default function Main() {
 
 
               {/* List headers */}
-              <div className="grid grid-cols-[1fr,1fr,100px,100px] border-y border-dark-100 gap-x-1 font-semibold">
+              <div className="grid grid-cols-[1fr,1fr,120px,120px] border-y border-dark-100 gap-x-1 font-semibold">
                 <ListHeader
                   name="Name"
                   sortKey={(a, b) => a.name.localeCompare(b.name)}
@@ -217,7 +220,8 @@ export default function Main() {
                 />
                 <ListHeader
                   name="Playlists"
-                  sortKey={(a, b) => a.inPlaylists.length - b.inPlaylists.length}
+                  sortKey={(a, b) => a.inPlaylists.map((p) => p.name).sort().join("")
+                      .localeCompare(b.inPlaylists.map((p) => p.name).sort().join(""))}
                   tracks={selectedTracks}
                   setTracks={setSelectedTracks}
                 />
@@ -238,7 +242,7 @@ export default function Main() {
               {/* List */}
               {selectedTracks.map((track) => (
                 <div
-                  className="grid grid-cols-[1fr,1fr,100px,100px] border-y gap-x-1"
+                  className="grid grid-cols-[1fr,1fr,120px,120px] border-y gap-x-1"
                   key={track.id}
                 >
                   {/* name, artist */}

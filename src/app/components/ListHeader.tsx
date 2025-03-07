@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Track } from "../lib/spotify-api";
+import { ArrowUpDown } from "lucide-react";
 
 export function ListHeader({
   name,
@@ -15,13 +16,14 @@ export function ListHeader({
   const [descending, setDescending] = useState(false);
   return (
     <div
-      className="cursor-pointer"
+      className="cursor-pointer flex items-center"
       onClick={() => {
         setTracks([...tracks].sort((a, b) => (descending ? -1 : 1) * sortKey(a, b)));
         setDescending(!descending);
       }}
     >
-      {name}
+      <span>{name}</span>
+      <ArrowUpDown size={12} className="inline ml-1" />
     </div>
   );
 }
