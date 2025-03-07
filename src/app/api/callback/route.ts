@@ -9,7 +9,11 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
 
-  if (!code) return NextResponse.json({ error: "No code provided" }, { status: 400 });
+  if (!code) {
+    const err = searchParams.get("error");  
+    if (err) return NextResponse.json({ error: err }, { status: 400 });
+    return NextResponse.json({ error: "No code provided" }, { status: 400 });
+  }
 
   const body = new URLSearchParams({
     grant_type: "authorization_code",
@@ -25,11 +29,12 @@ export async function GET(req: Request) {
     body,
   });
 
-  const data = await response.json();
-
   if (!response.ok) {
-    return NextResponse.json({ error: "Failed to get access token", details: data }, { status: 400 });
+    return NextResponse.json({ error: "Failed to get access token", details: await response.text() }, { status: 400 });
   }
+
+  const data = await response.json();
+  console.log("Access token:", data.access_token);
 
   const res = NextResponse.redirect(new URL("/", req.url).toString());
 

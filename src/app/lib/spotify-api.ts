@@ -103,11 +103,8 @@ export async function getUser(token: string): Promise<User> {
   const response = await fetch("https://api.spotify.com/v1/me", {
     headers: { Authorization: `Bearer ${token}` },
   });
+  if (!response.ok) throw new Error(`Failed to fetch user: ${response.status} ${await response.text()}`);
   const data = await response.json();
-
-  if (!response.ok)
-    throw new Error(`Failed to fetch user: ${data.error.status}, ${data.error.message}`);
-
   return {
     id: data.id,
     display_name: data.display_name,

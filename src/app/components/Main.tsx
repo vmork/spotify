@@ -9,6 +9,16 @@ import { cn } from "../lib/utils";
 import { CreatePlaylistButton } from "./CreatePlaylistButton";
 import { ListHeader } from "./ListHeader";
 
+function LoginButton() {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen">
+      <button className="bg-primary-100 p-2 rounded text-light-100 text-xl">
+        <Link href={"/api/login"}>Login with spotify</Link>
+      </button>
+    </div>
+  );
+}
+
 export default function Main() {
   const queryClient = useQueryClient();
 
@@ -20,6 +30,7 @@ export default function Main() {
       .split(";")
       .find((c) => c.startsWith("spotify_access_token="))
       ?.split("=")[1];
+    console.log("Access token:", token);
     setAccessToken(token);
   }, []);
 
@@ -110,28 +121,29 @@ export default function Main() {
           : t
       )
     );
-
     setSelectedPlaylists([playlist]);
   }
 
   return (
     <div>
       {!accessToken ? (
-        <div className="flex flex-col items-center justify-center h-screen">
-          <button className="bg-primary-100 p-2 rounded text-light-100 text-xl">
-            <Link href={"/api/login"}>Login with spotify</Link>
-          </button>
-        </div>
+        <LoginButton />
       ) : (
         <>
           {/* User info */}
           {userQuery.isLoading && <div>Loading user...</div>}
           {userQuery.isError && (
-            <div className="text-red-400">Error: {userQuery.error.message}</div>
+            <div>
+              <div className="text-red-400">Error: {userQuery.error.message}</div>
+              <div>Access token: {accessToken}</div>
+              <LoginButton />
+            </div>
           )}
           {user && (
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-primary-100">Logged in as {user.display_name}</h1>
+              <h1 className="text-3xl font-bold text-primary-100">
+                Logged in as {user.display_name}
+              </h1>
             </div>
           )}
 
@@ -175,7 +187,9 @@ export default function Main() {
           )}
 
           {/* Tracks */}
-          {allTracksQuery.isLoading && <div className="text-lg ml-2 font-semibold">Loading tracks...</div>}
+          {allTracksQuery.isLoading && (
+            <div className="text-lg ml-2 font-semibold">Loading tracks...</div>
+          )}
           {allTracksQuery.isError && (
             <div className="text-red-400">Error: {allTracksQuery.error.message}</div>
           )}
@@ -192,8 +206,10 @@ export default function Main() {
                     onChange={(e) => setSearchText(e.target.value)}
                   />
                   <div className="flex items-center">
-                    <span className="text-primary-100 text-lg">{selectedTracks.length} selected tracks</span>
-                
+                    <span className="text-primary-100 text-lg">
+                      {selectedTracks.length} selected tracks
+                    </span>
+
                     {user && (
                       <div className="ml-auto w-max">
                         <CreatePlaylistButton
@@ -217,8 +233,18 @@ export default function Main() {
                   />
                   <ListHeader
                     name="Playlists"
-                    sortKey={(a, b) => a.inPlaylists.map((p) => p.name).sort().join("")
-                        .localeCompare(b.inPlaylists.map((p) => p.name).sort().join(""))}
+                    sortKey={(a, b) =>
+                      a.inPlaylists
+                        .map((p) => p.name)
+                        .sort()
+                        .join("")
+                        .localeCompare(
+                          b.inPlaylists
+                            .map((p) => p.name)
+                            .sort()
+                            .join("")
+                        )
+                    }
                     tracks={selectedTracks}
                     setTracks={setSelectedTracks}
                   />
