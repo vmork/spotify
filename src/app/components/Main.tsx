@@ -166,7 +166,7 @@ export default function Main() {
                   <div
                     onClick={() => togglePlaylistSelected(playlist)}
                     className={cn(
-                      "cursor-pointer bg-light-200 text-sm border rounded p-0.5",
+                      "cursor-pointer bg-light-200 text-sm border rounded p-0.5 transition",
                       selectedPlaylists.includes(playlist) && "bg-primary-100 text-light-100"
                     )}
                     key={playlist.id}
@@ -174,7 +174,7 @@ export default function Main() {
                     {playlist.name}{" "}
                     <span
                       className={cn(
-                        "ml-auto text-dark-200",
+                        "ml-auto text-dark-200 transition",
                         selectedPlaylists.includes(playlist) && "text-light-200"
                       )}
                     >

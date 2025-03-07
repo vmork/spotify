@@ -1,12 +1,17 @@
 "use client";
 
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const firaCode = Fira_Code({
+  variable: "--font-fira-code",
   subsets: ["latin"],
 });
 
@@ -21,7 +26,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} antialiased overflow-y-scroll`}>
+      <body className={`${firaCode.variable} antialiased overflow-y-scroll`}>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </body>
     </html>
