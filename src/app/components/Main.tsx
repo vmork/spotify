@@ -180,63 +180,61 @@ export default function Main() {
             <div className="text-red-400">Error: {allTracksQuery.error.message}</div>
           )}
           {allTracksQuery.isSuccess && selectedTracks && (
-            <div className="mt-2 p-2">
+            <div className="p-2">
               {/* Top bar */}
-              <div className="flex flex-col mb-2">
-                <input
-                  type="text"
-                  placeholder="Search tracks"
-                  className="p-1 mb-2 max-w-[350px] border border-dark-100 rounded"
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                />
-
-
-                <div className="flex items-center">
-                  <span className="text-primary-100 text-lg">{selectedTracks.length} selected tracks</span>
-                  
-                  {user && (
-                    <div className="ml-auto w-max">
-                      <CreatePlaylistButton
-                        key={selectedTracks.map((track) => track.id).join(",")}
-                        tracks={selectedTracks ?? []}
-                        token={accessToken}
-                        userId={user.id}
-                        onCreate={onCreatePlaylist}
-                      />
-                    </div>
-                  )}
+              <div className="sticky top-0 pt-4 z-10 bg-light-100">
+                <div className="flex flex-col mb-2">
+                  <input
+                    type="text"
+                    placeholder="Search tracks"
+                    className="p-1 mb-2 max-w-[350px] border border-dark-100 rounded"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                  />
+                  <div className="flex items-center">
+                    <span className="text-primary-100 text-lg">{selectedTracks.length} selected tracks</span>
+                
+                    {user && (
+                      <div className="ml-auto w-max">
+                        <CreatePlaylistButton
+                          key={selectedTracks.map((track) => track.id).join(",")}
+                          tracks={selectedTracks ?? []}
+                          token={accessToken}
+                          userId={user.id}
+                          onCreate={onCreatePlaylist}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-
-              {/* List headers */}
-              <div className="grid grid-cols-[1fr,1fr,120px,120px] border-y border-dark-100 gap-x-1 font-semibold">
-                <ListHeader
-                  name="Name"
-                  sortKey={(a, b) => a.name.localeCompare(b.name)}
-                  tracks={selectedTracks}
-                  setTracks={setSelectedTracks}
-                />
-                <ListHeader
-                  name="Playlists"
-                  sortKey={(a, b) => a.inPlaylists.map((p) => p.name).sort().join("")
-                      .localeCompare(b.inPlaylists.map((p) => p.name).sort().join(""))}
-                  tracks={selectedTracks}
-                  setTracks={setSelectedTracks}
-                />
-                <ListHeader
-                  name="Realeased"
-                  sortKey={(a, b) => a.releaseYear - b.releaseYear}
-                  tracks={selectedTracks}
-                  setTracks={setSelectedTracks}
-                />
-                <ListHeader
-                  name="Popularity"
-                  sortKey={(a, b) => a.popularity - b.popularity}
-                  tracks={selectedTracks}
-                  setTracks={setSelectedTracks}
-                />
+                {/* List headers */}
+                <div className="grid grid-cols-[1fr,1fr,120px,120px] border-y border-dark-100 gap-x-1 font-semibold py-1">
+                  <ListHeader
+                    name="Name"
+                    sortKey={(a, b) => a.name.localeCompare(b.name)}
+                    tracks={selectedTracks}
+                    setTracks={setSelectedTracks}
+                  />
+                  <ListHeader
+                    name="Playlists"
+                    sortKey={(a, b) => a.inPlaylists.map((p) => p.name).sort().join("")
+                        .localeCompare(b.inPlaylists.map((p) => p.name).sort().join(""))}
+                    tracks={selectedTracks}
+                    setTracks={setSelectedTracks}
+                  />
+                  <ListHeader
+                    name="Realeased"
+                    sortKey={(a, b) => a.releaseYear - b.releaseYear}
+                    tracks={selectedTracks}
+                    setTracks={setSelectedTracks}
+                  />
+                  <ListHeader
+                    name="Popularity"
+                    sortKey={(a, b) => a.popularity - b.popularity}
+                    tracks={selectedTracks}
+                    setTracks={setSelectedTracks}
+                  />
+                </div>
               </div>
 
               {/* List */}
