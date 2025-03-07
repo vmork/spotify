@@ -142,7 +142,7 @@ export default function Main() {
           )}
           {playlists && (
             <div className="p-2 text-center">
-              <div className="flex justify-center items-center mb-2">
+              <div className="flex justify-center items-center mb-2 flex-wrap">
                 <span className="font-semibold">
                   {playlists.length} playlists with {totalTrackCount} tracks
                   {allTracks ? ` (${allTracks.length} unique)` : ""}
@@ -179,7 +179,7 @@ export default function Main() {
           {allTracksQuery.isError && (
             <div className="text-red-400">Error: {allTracksQuery.error.message}</div>
           )}
-          {selectedTracks && (
+          {allTracksQuery.isSuccess && selectedTracks && (
             <div className="mt-2 p-2">
               {/* Top bar */}
               <div className="flex flex-col mb-2">
