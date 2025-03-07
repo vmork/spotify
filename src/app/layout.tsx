@@ -21,7 +21,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} antialiased`}>
+      <body className={`${geistSans.variable} antialiased overflow-y-scroll`}>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </body>
     </html>

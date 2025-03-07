@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 const SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize";
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID!;
 const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI!;
-const SCOPE = "playlist-read-private playlist-read-collaborative user-library-read";
+const SCOPE = "playlist-read-private playlist-read-collaborative user-library-read playlist-modify-public playlist-modify-private";
 
 export async function GET() {  
   const params = new URLSearchParams({

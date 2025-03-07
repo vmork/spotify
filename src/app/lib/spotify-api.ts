@@ -9,6 +9,7 @@ export type Playlist = {
   description: string;
   owner: User;
   numTracks: number;
+  link: string;
 };
 
 export type Track = {
@@ -22,6 +23,54 @@ export type Track = {
   popularity: number;
 };
 
+export async function createPlaylist(
+  token: string,
+  userId: string,
+  name: string,
+  numTracks: number
+): Promise<Playlist> {
+  const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok)
+    throw new Error(`Failed to create playlist: ${response.status}, ${await response.text()}`);
+  const data = await response.json();
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    owner: data.owner,
+    numTracks: numTracks,
+    link: data.external_urls.spotify,
+  };
+}
+
+export async function addTracksToPlaylist(token: string, playlist: Playlist, tracks: Track[]): Promise<Playlist> {
+  const chunkSize = 100;
+  for (let i = 0; i < tracks.length; i += chunkSize) {
+    const chunk = tracks.slice(i, i + chunkSize);
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        uris: chunk.map((track) => `spotify:track:${track.id}`),
+      }),
+    });
+    if (!response.ok)
+      throw new Error(`Failed to add tracks to playlist: ${response.status} ${await response.text()}`);
+  }
+  playlist.numTracks = tracks.length;
+  return playlist;
+}
+
 async function getAllPaginated<T>(
   url: string,
   token: string,
@@ -30,7 +79,7 @@ async function getAllPaginated<T>(
   let data: T[] = [];
   let nextUrl = url;
   while (nextUrl) {
-    const response = await fetch(`${nextUrl}${nextUrl.includes('?') ? '&' : '?'}limit=50`, {
+    const response = await fetch(`${nextUrl}${nextUrl.includes("?") ? "&" : "?"}limit=50`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -56,7 +105,8 @@ export async function getUser(token: string): Promise<User> {
   });
   const data = await response.json();
 
-  if (!response.ok) throw new Error(`Failed to fetch user: ${data.error.status}, ${data.error.message}`);
+  if (!response.ok)
+    throw new Error(`Failed to fetch user: ${data.error.status}, ${data.error.message}`);
 
   return {
     id: data.id,
@@ -77,6 +127,7 @@ export async function getPlaylists(token: string, userId: string): Promise<Playl
     description: item.description,
     owner: item.owner,
     numTracks: item.tracks.total,
+    link: item.external_urls.spotify,
   }));
 
   return playlists.filter((playlist: Playlist) => playlist.owner.id === userId);
@@ -119,7 +170,8 @@ async function getLikedTracks(token: string): Promise<Track[]> {
     description: "",
     owner: { id: "me", display_name: "me" },
     numTracks: data.length,
-  }
+    link: "https://open.spotify.com/collection/tracks",
+  };
 
   return data.map((item: any) => parseApiTrack(item, likedTracksPlaylist));
 }
